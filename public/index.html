@@ -3,15 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <title>PixelChan</title>
+
   <style>
     html, body {
-      margin: 0; padding: 0; height: 100%; overflow: hidden;
-      font-family: Arial, sans-serif;
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
       display: flex;
-      flex-direction: row;
-      background: #eee;
+      font-family: Arial, sans-serif;
       user-select: none;
+      background: #eee;
     }
+
     #sidebar {
       width: 120px;
       background: #222;
@@ -23,113 +26,132 @@
       align-items: center;
       gap: 10px;
     }
+
+    canvas {
+      flex: 1;
+      background: white;
+      cursor: crosshair;
+      display: block;
+    }
+
     button {
       width: 80px;
       height: 40px;
-      font-size: 18px;
-      cursor: pointer;
-      border-radius: 5px;
       border: none;
       background: #444;
       color: white;
-      transition: background 0.2s;
-    }
-    button:hover {
-      background: #666;
-    }
-    #colorPicker {
-      width: 80px;
-      height: 40px;
-      border: none;
       cursor: pointer;
       border-radius: 5px;
     }
-    #instructions {
-      font-size: 12px;
-      line-height: 1.3;
-      margin-top: 15px;
+
+    button:hover {
+      background: #666;
+    }
+
+    #palette {
+      display: grid;
+      grid-template-columns: repeat(2, 40px);
+      gap: 5px;
+      margin-top: 10px;
+    }
+
+    .color-btn {
+      width: 40px;
+      height: 40px;
+      border: 2px solid #555;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .color-btn.selected {
+      border: 2px solid white;
+      box-shadow: 0 0 5px white;
+    }
+
+    #overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #111;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      font-size: 30px;
+      z-index: 9999;
+    }
+
+    #countdownText {
       text-align: center;
+      font-weight: bold;
     }
-    canvas {
-      flex-grow: 1;
-      display: block;
-      background: white;
-      cursor: crosshair;
-    }
-#palette {
-  display: grid;
-  grid-template-columns: repeat(2, 40px);
-  gap: 5px;
-  margin-top: 10px;
-}
-
-.color-btn {
-  width: 40px;
-  height: 40px;
-  border: 2px solid #555;
-  cursor: pointer;
-  border-radius: 4px;
-  padding: 0;
-}
-
-.color-btn.selected {
-  border: 2px solid white;
-  box-shadow: 0 0 5px white;
-}
-#overlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: #111;
-  color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  font-size: 36px;
-  z-index: 9999;
-}
-
-#countdownText {
-  text-align: center;
-  font-weight: bold;
-}
-
-
   </style>
 </head>
-<body>
-  <div id="sidebar">
-    <button id="zoomIn">+</button>
-    <button id="zoomOut">-</button>
-    <div id="palette">
-      <button class="color-btn selected" style="background:#FF0000;" data-color="#FF0000"></button>
-      <button class="color-btn" style="background:#ff4949;" data-color="#ff4949"></button>
-      <button class="color-btn" style="background:#00FF00;" data-color="#00FF00"></button>
-      <button class="color-btn" style="background:#008300;" data-color="#008300"></button>
-      <button class="color-btn" style="background:#0000FF;" data-color="#0000FF"></button>
-      <button class="color-btn" style="background:#5353ff;" data-color="#5353ff"></button>
-      <button class="color-btn" style="background:#FFFF00;" data-color="#FFFF00"></button>
-      <button class="color-btn" style="background:#FFA500;" data-color="#FFA500"></button>
-      <button class="color-btn" style="background:#800080;" data-color="#800080"></button>
-      <button class="color-btn" style="background:#000000;" data-color="#000000"></button>
-      <button class="color-btn" style="background:#FFFFFF;" data-color="#FFFFFF"></button>
-    </div>
 
-    <div id="instructions">
+<body>
+
+<div id="sidebar">
+  <button id="zoomIn">+</button>
+  <button id="zoomOut">-</button>
+
+  <div id="palette">
+    <button class="color-btn selected" style="background:#FF0000" data-color="#FF0000"></button>
+    <button class="color-btn" style="background:#FF4949" data-color="#FF4949"></button>
+    <button class="color-btn" style="background:#00FF00" data-color="#00FF00"></button>
+    <button class="color-btn" style="background:#008300" data-color="#008300"></button>
+    <button class="color-btn" style="background:#0000FF" data-color="#0000FF"></button>
+    <button class="color-btn" style="background:#FFFF00" data-color="#FFFF00"></button>
+    <button class="color-btn" style="background:#000000" data-color="#000000"></button>
+    <button class="color-btn" style="background:#FFFFFF" data-color="#FFFFFF"></button>
+  </div>
+      <div id="instructions">
       <p><strong>Instructions :</strong></p>
       <p>Pan : clic droit + glisser</p>
       <p>Dessiner : clic gauche</p>
       <p>Trainée : maintenir <strong>espace</strong> + clic gauche + déplacer souris</p>
       <p>Zoom : boutons + / -</p>
-    </div>
   </div>
-  <canvas id="canvas"></canvas>
+</div>
+
+<canvas id="canvas"></canvas>
+
 <div id="overlay">
   <div id="countdownText">Chargement...</div>
 </div>
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="/script.js"></script>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/script.js"></script>
+
+<script>
+  const overlay = document.getElementById("overlay");
+  const countdownText = document.getElementById("countdownText");
+
+  const targetDate = new Date("2025-06-26T19:23:00");
+
+  function updateCountdown() {
+    const now = new Date();
+    const diff = targetDate - now;
+
+    if (diff <= 0) {
+      overlay.style.display = "none";
+      return;
+    }
+
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor(diff / 3600000) % 24;
+    const m = Math.floor(diff / 60000) % 60;
+    const s = Math.floor(diff / 1000) % 60;
+
+    countdownText.innerHTML =
+      `<div>PixelChan ouvre dans :</div>
+       <div>${d}j ${h}h ${m}m ${s}s</div>`;
+  }
+
+  setInterval(updateCountdown, 1000);
+  updateCountdown();
+</script>
+
 </body>
 </html>
